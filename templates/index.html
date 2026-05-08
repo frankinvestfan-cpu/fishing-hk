@@ -36,6 +36,11 @@
     <div>{{ c.temp_c }}°C <span style="color:var(--text-dim);font-size:0.85em;">(體感 {{ c.feels_like_c }}°C)</span></div>
     <div style="font-size:0.85em;color:var(--text-dim);">{{ c.weather_desc }}</div>
     <div style="font-size:0.8em;margin-top:4px;">💨 {{ c.wind_kmph }}km/h {{ c.wind_dir }} · 🌡 {{ c.pressure_hpa }}hPa</div>
+    {% if sea_state %}
+    <div style="margin-top:4px;padding:6px 8px;background:rgba(255,255,255,0.05);border-radius:6px;font-size:0.85em;">
+      🌊 <strong>{{ sea_state.state_zh }}</strong> 浪高約{{ sea_state.wave }} {{ sea_state.risk }}
+    </div>
+    {% endif %}
   </div>
   {% endif %}
 </div>

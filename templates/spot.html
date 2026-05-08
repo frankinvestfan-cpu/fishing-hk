@@ -205,6 +205,13 @@
     <div class="weather-item"><span class="label">💨 風速</span>{{ c.wind_kmph }}km/h {{ c.wind_dir }}</div>
     <div class="weather-item"><span class="label">🌡 氣壓</span>{{ c.pressure_hpa }}hPa</div>
   </div>
+  {% if sea_state %}
+  <div style="margin-top:6px;padding:8px;background:rgba(255,255,255,0.05);border-radius:6px;font-size:0.9em;">
+    <span>🌊 海浪狀態：<strong>{{ sea_state.state_zh }}</strong></span>
+    <span style="margin-left:8px;">浪高約{{ sea_state.wave }}</span>
+    <span style="margin-left:8px;">{{ sea_state.risk }}</span>
+  </div>
+  {% endif %}
   <div style="margin-top:6px;font-size:0.85em;color:var(--text-dim);">{{ c.weather_desc }}</div>
 </div>
 {% endif %}
