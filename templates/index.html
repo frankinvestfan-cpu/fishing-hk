@@ -1,0 +1,118 @@
+{% extends "base.html" %}
+{% block title %}🎣 香港釣魚預測{% endblock %}
+{% block content %}
+
+<!-- Today's Overview -->
+<div class="card">
+  <div class="section-title">🐟 今日釣魚指數</div>
+  <div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap;">
+    <div class="big-score score-{{ level }}-text">{{ score }}/10</div>
+    <div style="flex:1;min-width:120px;">
+      <div>{{ label }}</div>
+      <div class="score-bar score-{{ level }}">
+        <div class="score-fill" style="width:{{ score * 10 }}%"></div>
+      </div>
+      <div style="font-size:0.8em;color:var(--text-dim);margin-top:4px;">
+        🌊潮水 {{ breakdown.tide }}/10 · 🌙月相 {{ breakdown.moon }}/10 · ⏰時段 {{ breakdown.time }}/10<br>
+        🌡️氣壓 {{ breakdown.pressure }}/10 · 🌡溫度 {{ breakdown.temp }}/10 · 💨風速 {{ breakdown.wind }}/10
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Moon & Weather -->
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+  {% if moon %}
+  <div class="card">
+    <div class="section-title">🌙 月相</div>
+    <div>{{ moon.phase_name }}</div>
+    <div style="font-size:0.85em;color:var(--text-dim);">光照 {{ moon.illumination }}% · {{ moon.tide_type }}</div>
+  </div>
+  {% endif %}
+  {% if weather %}
+  <div class="card">
+    <div class="section-title">🌤️ 天氣</div>
+    {% set c = weather.current %}
+    <div>{{ c.temp_c }}°C <span style="color:var(--text-dim);font-size:0.85em;">(體感 {{ c.feels_like_c }}°C)</span></div>
+    <div style="font-size:0.85em;color:var(--text-dim);">{{ c.weather_desc }}</div>
+    <div style="font-size:0.8em;margin-top:4px;">💨 {{ c.wind_kmph }}km/h {{ c.wind_dir }} · 🌡 {{ c.pressure_hpa }}hPa</div>
+  </div>
+  {% endif %}
+</div>
+
+<!-- 7-Day Overview -->
+{% if week_overview %}
+<div class="card">
+  <div class="section-title">📅 7日最佳釣魚日</div>
+  <div class="week-overview-grid">
+  {% for day in week_overview %}
+  <div class="day-card {{ 'day-best' if day.is_best else '' }} {{ 'day-today' if day.is_today else '' }}">
+    <div class="day-date">{{ day.date.month }}/{{ day.date.day }}</div>
+    <div class="day-weekday">週{{ day.day_zh }}</div>
+    <div class="day-emoji">{{ day.emoji }}</div>
+    <div class="day-score">{{ day.solunar_rating }}/10</div>
+    {% if day.tide_range %}
+    <div class="day-tide">潮差{{ day.tide_range.range }}m</div>
+    {% else %}
+    <div class="day-tide">—</div>
+    {% endif %}
+    {% if day.is_best %}<div class="day-badge">🔥最佳</div>{% endif %}
+  </div>
+  {% endfor %}
+  </div>
+</div>
+{% endif %}
+
+<!-- Error -->
+{% if error %}
+<div class="error-msg">{{ error }}</div>
+{% endif %}
+
+<!-- Spot Selector -->
+<div class="card">
+  <div class="section-title">📍 選擇釣點</div>
+  {% for district, spots in districts.items() %}
+  <div class="district-header">{% if district == "Sai Kung" %}🌊{% elif district == "HK Island" %}🏙️{% elif district == "Islands" %}🏝️{% elif district == "Kowloon" %}🏢{% elif district == "NT East" %}🏔️{% elif district == "NT West" %}⛰️{% elif district == "Central" %}🏙️{% else %}📍{% endif %} {{ district }}</div>
+  <div class="spot-grid">
+    {% for s in spots %}
+    <a href="/spot/{{ s.id.strip() }}" class="spot-card">
+      <div class="name-zh">{{ s.name_zh }}</div>
+      <div class="name-en">{{ s.name_en }}</div>
+      <div class="rating">
+        {% if s.difficulty == 'beginner' %}
+          <span class="badge badge-beginner">新手</span>
+        {% elif s.difficulty == 'easy' %}
+          <span class="badge badge-easy">易</span>
+        {% elif s.difficulty == 'medium' %}
+          <span class="badge badge-medium">中</span>
+        {% elif s.difficulty == 'hard' %}
+          <span class="badge badge-hard">難</span>
+        {% endif %}
+        ⭐{{ s.rating }}
+      </div>
+    </a>
+    {% endfor %}
+  </div>
+  {% endfor %}
+</div>
+
+<!-- Recent Catches -->
+{% if recent_catches %}
+<div class="card">
+  <div class="section-title">🎣 最近釣獲</div>
+  {% for c in recent_catches %}
+  <div style="padding:4px 0;font-size:0.9em;border-bottom:1px solid rgba(255,255,255,0.05);">
+    <span style="color:var(--text-dim);">{{ c.get('date', '?')[:5] if c.get('date', '?')|length > 5 else c.get('date', '?') }}</span>
+    <span>{{ spot_map.get(c.get('spot_id', ''), c.get('spot_id', '?')) }}</span>
+    <span style="font-weight:600;">{{ c.get('fish', '?') }} x{{ c.get('count', 0) }}</span>
+    {% if c.get('weight') %}<span style="color:var(--text-dim);">{{ c.weight }}斤</span>{% endif %}
+    {% if c.get('bait') %}<span style="color:var(--text-dim);font-size:0.85em;">{{ c.bait }}</span>{% endif %}
+  </div>
+  {% endfor %}
+</div>
+{% endif %}
+
+<div class="refresh-info">
+  📅 {{ target_date.strftime('%Y年%m月%d日') }} · 天氣數據每30分鐘自動更新
+</div>
+{% endblock %}

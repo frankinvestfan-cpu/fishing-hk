@@ -1,0 +1,497 @@
+{% extends "base.html" %}
+{% block title %}🎣 {{ spot.name_zh }} 釣魚指南{% endblock %}
+{% block content %}
+
+<a href="/" class="back-link">← 返回所有釣點</a>
+
+<!-- Date Selector -->
+{% if date_list %}
+<div class="card" style="padding:10px 16px;">
+  <div class="section-title" style="margin-bottom:8px;">📅 選擇日期</div>
+  <div class="date-selector">
+  {% for d in date_list %}
+  <a href="/spot/{{ spot.id.strip() }}?date={{ d.date.isoformat() }}"
+     class="date-btn {{ 'date-selected' if d.is_selected else '' }} {{ 'date-today' if d.is_today else '' }}">
+    <span class="date-btn-day">週{{ d.day_zh }}</span>
+    <span class="date-btn-num">{{ d.date.month }}/{{ d.date.day }}</span>
+    {% if d.is_today %}<span class="date-today-dot">今</span>{% endif %}
+  </a>
+  {% endfor %}
+  </div>
+</div>
+{% endif %}
+
+<!-- Spot Header -->
+<div class="card">
+  <div style="display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:8px;">
+    <div>
+      <h2 style="margin:0;">🎣 {{ spot.name_zh }}</h2>
+      <div style="color:var(--text-dim);">{{ spot.name_en }}</div>
+    </div>
+    <div style="text-align:right;">
+      <div class="big-score score-{{ level }}-text">{{ score }}/10</div>
+      <div>{{ label }}</div>
+    </div>
+  </div>
+  <div style="margin-top:8px;">
+    <span class="badge badge-{{ 'beginner' if spot.difficulty == 'beginner' else ('easy' if spot.difficulty == 'easy' else ('medium' if spot.difficulty == 'medium' else 'hard')) }}">
+      {{ '新手' if spot.difficulty == 'beginner' else ('易' if spot.difficulty == 'easy' else ('中' if spot.difficulty == 'medium' else '難')) }}
+    </span>
+    <span style="margin-left:6px;">📍 {{ spot.district }}</span>
+    <span style="margin-left:6px;">⭐{{ spot.rating }}</span>
+  </div>
+  <div style="margin-top:8px;display:flex;flex-wrap:wrap;gap:4px;">
+    {% for fish in spot.fish %}
+    <span class="fish-tag">{{ fish }}</span>
+    {% endfor %}
+  </div>
+  {% if spot.lat and spot.lng %}
+  <a href="https://www.google.com/maps?q={{ spot.lat }},{{ spot.lng }}" target="_blank" class="map-link">
+    📍 Google Maps
+  </a>
+  {% endif %}
+</div>
+
+<!-- Score Breakdown -->
+<div class="card">
+  <div class="section-title">🐟 釣魚指數詳情</div>
+  <div class="score-bar score-{{ level }}" style="margin-bottom:8px;">
+    <div class="score-fill" style="width:{{ score * 10 }}%"></div>
+  </div>
+  <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px;font-size:0.85em;">
+    <div>🌊 潮水 {{ breakdown.tide }}/10</div>
+    <div>🌙 月相 {{ breakdown.moon }}/10</div>
+    <div>⏰ 時段 {{ breakdown.time }}/10</div>
+    <div>🌡️ 氣壓 {{ breakdown.pressure }}/10</div>
+    <div>🌡 溫度 {{ breakdown.temp }}/10</div>
+    <div>💨 風速 {{ breakdown.wind }}/10</div>
+  </div>
+</div>
+
+<!-- Terrain -->
+{% if terrain %}
+<div class="card">
+  <div class="section-title">🏖️ 地形資料</div>
+  <div class="info-row"><span class="key">地形</span><span class="val">{{ terrain.terrain }}</span></div>
+  <div class="info-row"><span class="key">海床</span><span class="val">{{ terrain.seabed }}</span></div>
+  <div class="info-row"><span class="key">水深</span><span class="val">{{ terrain.depth }}</span></div>
+  <div class="info-row"><span class="key">最佳釣法</span><span class="val">🎣 {{ terrain.best_method }}</span></div>
+  <div class="info-row"><span class="key">最佳魚餌</span><span class="val">🪱 {{ terrain.best_bait }}</span></div>
+  <div class="info-row"><span class="key">潮水偏好</span><span class="val">🌊 {{ terrain.tide_preference }}</span></div>
+  {% if terrain.night_fishing %}
+  <div class="info-row"><span class="key">夜釣</span><span class="val" style="color:var(--green);">✅ 可以</span></div>
+  {% else %}
+  <div class="info-row"><span class="key">夜釣</span><span class="val" style="color:var(--red);">❌ 不建議</span></div>
+  {% endif %}
+  {% if terrain.hazards %}
+  <div class="info-row"><span class="key">⚠️ 危險</span><span class="val" style="color:var(--orange);">{{ terrain.hazards }}</span></div>
+  {% endif %}
+  {% if terrain.facilities %}
+  <div class="info-row"><span class="key">設施</span><span class="val">{{ terrain.facilities }}</span></div>
+  {% endif %}
+  {% if terrain.tips %}
+  <div class="info-row"><span class="key">💡 貼士</span><span class="val">{{ terrain.tips }}</span></div>
+  {% endif %}
+</div>
+{% endif %}
+
+<!-- Water Quality -->
+{% if water_quality %}
+<div class="card">
+  <div class="section-title">🚰 水質</div>
+  {% set wq = water_quality %}
+  {% if wq.water_quality == 'excellent' %}
+    <div style="font-size:1.1em;">✅✅ {{ wq.water_quality_zh }}</div>
+  {% elif wq.water_quality == 'good' %}
+    <div style="font-size:1.1em;">✅ {{ wq.water_quality_zh }}</div>
+  {% elif wq.water_quality == 'moderate' %}
+    <div style="font-size:1.1em;color:var(--orange);">⚠️ {{ wq.water_quality_zh }}</div>
+  {% else %}
+    <div style="font-size:1.1em;color:var(--red);">❌ {{ wq.water_quality_zh }}</div>
+  {% endif %}
+  {% if wq.edible %}
+  <div style="margin-top:6px;font-size:0.85em;">
+    {% for fish, v in wq.edible.items() %}
+    {% if v == 'yes' %}
+    <span class="fish-tag" style="background:rgba(78,204,163,0.15);">{{ fish }} ✅放心</span>
+    {% elif v == 'limit' %}
+    <span class="fish-tag" style="background:rgba(240,192,64,0.15);color:var(--yellow);">{{ fish }} ⚠️少量</span>
+    {% else %}
+    <span class="fish-tag" style="background:rgba(233,69,96,0.15);color:var(--red);">{{ fish }} ❌放生</span>
+    {% endif %}
+    {% endfor %}
+  </div>
+  {% endif %}
+</div>
+{% endif %}
+
+<!-- Tide -->
+<div class="card">
+  <div class="section-title">🌊 潮汐 ({{ station_name_zh }})</div>
+  {% if tide_events %}
+    {% for e in tide_events %}
+    <div class="tide-event">
+      <span class="time">{{ e.time }}</span>
+      <span class="{{ 'tide-high' if e.type == 'high' else 'tide-low' }}">
+        {{ '🔺' if e.type == 'high' else '🔻' }} {{ '高潮' if e.type == 'high' else '低潮' }}
+      </span>
+      <span class="height">{{ e.height }}m</span>
+    </div>
+    {% endfor %}
+    {% if tide_range %}
+    <div style="margin-top:6px;font-size:0.85em;color:var(--text-dim);">
+      潮差 {{ tide_range.range }}m · 最高 {{ tide_range.max_high }}m · 最低 {{ tide_range.min_low }}m
+    </div>
+    {% endif %}
+  {% else %}
+    <div style="color:var(--text-dim);">⚠️ 無潮汐數據</div>
+  {% endif %}
+</div>
+
+<!-- Tide Windows -->
+{% if tide_windows %}
+<div class="card">
+  <div class="section-title">🎣 最佳潮水時窗</div>
+  {% for w in tide_windows[:3] %}
+  <div style="padding:4px 0;font-size:0.9em;">
+    {% if w.score >= 7 %}🔥{% elif w.score >= 5 %}✅{% else %}  {% endif %}
+    {{ w.start }}-{{ w.end }} {{ w.direction }} · 變化 {{ w.height_change }}m · 評分 {{ w.score }}/10
+  </div>
+  {% endfor %}
+</div>
+{% endif %}
+
+<!-- Moon & Solunar -->
+<div class="card">
+  <div class="section-title">🌙 月相 & Solunar</div>
+  <div>{{ moon.phase_name }} · 光照 {{ moon.illumination }}% · {{ moon.tide_type }}</div>
+  {% if solunar_periods %}
+  <div style="margin-top:8px;">
+    {% for p in solunar_periods %}
+    <div style="font-size:0.9em;" class="{{ 'solunar-major' if p.type == 'major' else 'solunar-minor' }}">
+      {{ '🔴' if p.type == 'major' else '🟡' }} {{ p.start }}-{{ p.end }}
+      {{ 'Major' if p.type == 'major' else 'Minor' }} · {{ p.description }}
+    </div>
+    {% endfor %}
+  </div>
+  {% endif %}
+</div>
+
+<!-- Hourly -->
+<div class="card">
+  <div class="section-title">⏰ 今日逐時活動預測</div>
+  {% for h in hourly_scores %}
+  <div class="hourly-row {{ 'now' if h.is_now }}">
+    <span class="time">{{ '%02d' | format(h.hour) }}:00</span>
+    <div class="bar-wrap">
+      {% set color = '#4ecca3' if h.score >= 8 else ('#4fc3f7' if h.score >= 6 else ('#f0c040' if h.score >= 4 else '#e94560')) %}
+      <div class="bar-inner" style="width:{{ h.score * 10 }}%;background:{{ color }};"></div>
+    </div>
+    <span class="score-num">{{ h.score }}/10</span>
+    {% if h.is_now %}<span style="color:var(--highlight);font-size:0.8em;">👈</span>{% endif %}
+    {% if h.score >= 8 %}<span style="font-size:0.8em;">🎣</span>{% endif %}
+  </div>
+  {% endfor %}
+</div>
+
+<!-- Weather -->
+{% if weather %}
+<div class="card">
+  <div class="section-title">🌤️ 天氣</div>
+  {% set c = weather.current %}
+  <div class="weather-grid">
+    <div class="weather-item"><span class="label">🌡 溫度</span>{{ c.temp_c }}°C</div>
+    <div class="weather-item"><span class="label">🤗 體感</span>{{ c.feels_like_c }}°C</div>
+    <div class="weather-item"><span class="label">💨 風速</span>{{ c.wind_kmph }}km/h {{ c.wind_dir }}</div>
+    <div class="weather-item"><span class="label">🌡 氣壓</span>{{ c.pressure_hpa }}hPa</div>
+  </div>
+  <div style="margin-top:6px;font-size:0.85em;color:var(--text-dim);">{{ c.weather_desc }}</div>
+</div>
+{% endif %}
+
+<!-- Seasonal Fish -->
+{% if seasonal_fish %}
+<div class="card">
+  <div class="section-title">🐟 當季魚種</div>
+  {% for name, info in seasonal_fish.items() %}
+  <div style="padding:4px 0;font-size:0.9em;">
+    <strong>{{ name }}</strong> ({{ info.en }}) {{ info.avg_size }}
+    <div style="font-size:0.8em;color:var(--text-dim);">最佳時段: {{ '/'.join(info.best_time) }}</div>
+  </div>
+  {% endfor %}
+</div>
+{% endif %}
+
+<!-- 7-Day Preview -->
+{% if week_preview %}
+<div class="card">
+  <div class="section-title">📅 未來7日潮汐預覽</div>
+  {% for day in week_preview %}
+  <div class="week-row">
+    <span class="day">{{ day.date.month }}/{{ day.date.day }} {{ day.day_zh }}</span>
+    <span class="moon">{{ day.moon_phase[:4] if day.moon_phase else '' }}</span>
+    {% if day.tide_range %}
+    <span class="range {% if day.tide_range.range >= 2.3 %}week-hot{% elif day.tide_range.range >= 1.8 %}week-ok{% endif %}">
+      潮差{{ day.tide_range.range }}m
+    </span>
+    {% if day.best_window %}
+    <span style="font-size:0.8em;color:var(--text-dim);">{{ day.best_window.start }}-{{ day.best_window.end }} {{ day.best_window.direction.split()[0] if day.best_window.direction else '' }}</span>
+    {% endif %}
+    {% if day.tide_range.range >= 2.3 %}<span>🔥</span>{% endif %}
+    {% else %}
+    <span class="range">⚠️ 無數據</span>
+    {% endif %}
+  </div>
+  {% endfor %}
+</div>
+{% endif %}
+
+<!-- Action Advice -->
+<div class="card" style="border: 1px solid var(--highlight);">
+  <div class="section-title">💡 出發建議</div>
+  {% if tide_windows %}
+  {% set best_w = tide_windows | sort(attribute='score') | reverse | first %}
+  <div>🕐 最佳出發: <strong>{{ best_w.start }}</strong> 開始 ({{ best_w.direction }})</div>
+  {% endif %}
+  {% if terrain %}
+  <div>📦 魚餌: {{ terrain.best_bait }}</div>
+  <div>🎣 釣法: {{ terrain.best_method }}</div>
+  {% if terrain.night_fishing %}
+  <div>🌙 可以夜釣！帶頭燈同充足裝備</div>
+  {% else %}
+  <div>☀️ 唔建議夜釣</div>
+  {% endif %}
+  {% if terrain.hazards %}
+  <div style="color:var(--orange);">⚠️ 安全: {{ terrain.hazards }}</div>
+  {% endif %}
+  {% endif %}
+  <div style="margin-top:8px;font-size:1.2em;font-weight:600;">
+    🐟 整體指數: <span class="score-{{ level }}-text">{{ score }}/10 {{ label }}</span>
+  </div>
+</div>
+
+<!-- Catch Logging Form -->
+<div class="card" style="border: 1px solid var(--green);">
+  <div class="section-title">📝 記錄釣獲</div>
+  <form id="catchForm" style="display:flex;flex-direction:column;gap:8px;">
+    <input type="hidden" id="catchSpot" value="{{ spot.id.strip() }}">
+    <input type="hidden" id="catchDate" value="{{ target_date.isoformat() }}">
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+      <div>
+        <label style="font-size:0.85em;color:var(--text-dim);">魚種 *</label>
+        <select id="catchFish" style="width:100%;padding:6px 8px;background:var(--bg);color:var(--text);border:1px solid rgba(255,255,255,0.15);border-radius:6px;font-size:0.9em;">
+          {% for f in fish_options %}
+          <option value="{{ f }}">{{ f }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div>
+        <label style="font-size:0.85em;color:var(--text-dim);">數量 *</label>
+        <input type="number" id="catchCount" min="1" value="1" style="width:100%;padding:6px 8px;background:var(--bg);color:var(--text);border:1px solid rgba(255,255,255,0.15);border-radius:6px;font-size:0.9em;">
+      </div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+      <div>
+        <label style="font-size:0.85em;color:var(--text-dim);">重量(斤)</label>
+        <input type="number" id="catchWeight" step="0.1" min="0" placeholder="選填" style="width:100%;padding:6px 8px;background:var(--bg);color:var(--text);border:1px solid rgba(255,255,255,0.15);border-radius:6px;font-size:0.9em;">
+      </div>
+      <div>
+        <label style="font-size:0.85em;color:var(--text-dim);">釣法</label>
+        <select id="catchMethod" style="width:100%;padding:6px 8px;background:var(--bg);color:var(--text);border:1px solid rgba(255,255,255,0.15);border-radius:6px;font-size:0.9em;">
+          <option value="">—</option>
+          {% for m in method_options %}
+          <option value="{{ m }}">{{ m }}</option>
+          {% endfor %}
+        </select>
+      </div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+      <div>
+        <label style="font-size:0.85em;color:var(--text-dim);">魚餌</label>
+        <select id="catchBait" style="width:100%;padding:6px 8px;background:var(--bg);color:var(--text);border:1px solid rgba(255,255,255,0.15);border-radius:6px;font-size:0.9em;">
+          <option value="">—</option>
+          {% for b in bait_options %}
+          <option value="{{ b }}">{{ b }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div>
+        <label style="font-size:0.85em;color:var(--text-dim);">潮水</label>
+        <select id="catchTide" style="width:100%;padding:6px 8px;background:var(--bg);color:var(--text);border:1px solid rgba(255,255,255,0.15);border-radius:6px;font-size:0.9em;">
+          <option value="">—</option>
+          {% for t in tide_options %}
+          <option value="{{ t }}">{{ t }}</option>
+          {% endfor %}
+        </select>
+      </div>
+    </div>
+    <div>
+      <label style="font-size:0.85em;color:var(--text-dim);">備註</label>
+      <input type="text" id="catchNotes" placeholder="選填" style="width:100%;padding:6px 8px;background:var(--bg);color:var(--text);border:1px solid rgba(255,255,255,0.15);border-radius:6px;font-size:0.9em;">
+    </div>
+    <button type="submit" class="action-btn" style="align-self:flex-start;margin-top:4px;">✅ 記錄</button>
+  </form>
+  <div id="catchToast" style="display:none;background:var(--green);color:#fff;padding:8px 16px;border-radius:6px;margin-top:8px;font-size:0.9em;">✅ 已記錄釣獲！</div>
+</div>
+
+<!-- Catch History -->
+{% if spot_catches %}
+<div class="card">
+  <div class="section-title">🎣 釣獲記錄</div>
+  {% if spot_stats and spot_stats.get('total_count', 0) > 0 %}
+  <div style="font-size:0.9em;color:var(--text-dim);margin-bottom:8px;">
+    共 {{ spot_stats.total_count }} 條魚，最常釣: 
+    {% if spot_stats.most_common_fish %}
+      {{ spot_stats.most_common_fish[0] }}({{ spot_stats.most_common_fish[1] }}次)
+    {% endif %}
+  </div>
+  {% endif %}
+  {% for c in spot_catches %}
+  <div id="catch-{{ c.get('id', '') }}" style="padding:4px 0;font-size:0.9em;border-bottom:1px solid rgba(255,255,255,0.05);display:flex;justify-content:space-between;align-items:center;">
+    <div id="catch-view-{{ c.get('id', '') }}">
+      <span style="color:var(--text-dim);">{{ c.get('date', '?') }}</span>
+      <span style="font-weight:600;">{{ c.get('fish', '?') }} x{{ c.get('count', 0) }}</span>
+      {% if c.get('weight') %}<span style="color:var(--text-dim);">{{ c.weight }}斤</span>{% endif %}
+      {% if c.get('method') or c.get('bait') %}
+      <span style="color:var(--text-dim);font-size:0.85em;">{{ c.get('bait', '') }}{% if c.get('bait') and c.get('method') %}/{% endif %}{{ c.get('method', '') }}</span>
+      {% endif %}
+      {% if c.get('tide_state') %}<span style="color:var(--blue);font-size:0.85em;">🌊{{ c.tide_state }}</span>{% endif %}
+    </div>
+    <div id="catch-edit-{{ c.get('id', '') }}" style="display:none;">
+      <input type="text" id="edit-fish-{{ c.get('id', '') }}" value="{{ c.get('fish', '') }}" style="width:50px;font-size:0.85em;padding:2px 4px;">
+      x<input type="number" id="edit-count-{{ c.get('id', '') }}" value="{{ c.get('count', 1) }}" style="width:35px;font-size:0.85em;padding:2px 4px;">
+      <input type="text" id="edit-weight-{{ c.get('id', '') }}" value="{{ c.get('weight', '') }}" placeholder="斤" style="width:35px;font-size:0.85em;padding:2px 4px;">
+    </div>
+    <div style="display:flex;gap:4px;">
+      <button class="edit-btn" onclick="toggleEdit('{{ c.get('id', '') }}')" title="編輯">✎</button>
+      <button class="delete-btn" onclick="deleteCatch('{{ c.get('id', '') }}', this)" title="刪除">✕</button>
+    </div>
+  </div>
+  {% endfor %}
+  {% if spot_catches|length > 0 %}
+  <div style="margin-top:8px;text-align:right;">
+    <button class="delete-btn" style="font-size:0.8em;padding:4px 10px;" onclick="deleteAllSpotCatches('{{ spot.id.strip() }}')">🗑️ 清除全部</button>
+  </div>
+  {% endif %}
+</div>
+{% endif %}
+
+<div class="refresh-info">
+  📅 {{ target_date.strftime('%Y年%m月%d日') }} · 天氣數據每30分鐘自動更新
+  <br>
+  <a href="/api/spot/{{ spot.id.strip() }}" style="color:var(--blue);">📊 JSON API</a>
+</div>
+
+<!-- Auto refresh weather -->
+<script>
+setTimeout(function(){ location.reload(); }, 30 * 60 * 1000);
+
+// Catch form submission
+document.getElementById('catchForm').addEventListener('submit', function(e) {
+  e.preventDefault();
+  var data = {
+    spot_id: document.getElementById('catchSpot').value,
+    fish: document.getElementById('catchFish').value,
+    count: document.getElementById('catchCount').value,
+    date: document.getElementById('catchDate').value,
+  };
+  var weight = document.getElementById('catchWeight').value;
+  if (weight) data.weight = parseFloat(weight);
+  var method = document.getElementById('catchMethod').value;
+  if (method) data.method = method;
+  var bait = document.getElementById('catchBait').value;
+  if (bait) data.bait = bait;
+  var tide = document.getElementById('catchTide').value;
+  if (tide) data.tide_state = tide;
+  var notes = document.getElementById('catchNotes').value;
+  if (notes) data.notes = notes;
+
+  fetch('/api/catch', {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify(data)
+  })
+  .then(function(r) { return r.json(); })
+  .then(function(result) {
+    if (result.success) {
+      var toast = document.getElementById('catchToast');
+      toast.style.display = 'block';
+      document.getElementById('catchForm').reset();
+      setTimeout(function() { toast.style.display = 'none'; location.reload(); }, 1500);
+    } else {
+      alert('記錄失敗: ' + (result.error || '未知錯誤'));
+    }
+  })
+  .catch(function(err) { alert('網絡錯誤'); });
+});
+
+function deleteCatch(catchId, btn) {
+  if (!confirm('確定刪除呢條記錄？')) return;
+  fetch('/api/catch/delete', {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({catch_id: catchId})
+  })
+  .then(r => r.json())
+  .then(function(result) {
+    if (result.success) { location.reload(); }
+    else { alert('刪除失敗: ' + (result.error || '未知錯誤')); }
+  })
+  .catch(function(err) { alert('網絡錯誤'); });
+}
+
+function deleteAllSpotCatches(spotId) {
+  if (!confirm('確定刪除呢個釣點所有記錄？')) return;
+  fetch('/api/catch/delete', {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({spot_id: spotId})
+  })
+  .then(r => r.json())
+  .then(function(result) {
+    if (result.success) { location.reload(); }
+    else { alert('刪除失敗: ' + (result.error || '未知錯誤')); }
+  })
+  .catch(function(err) { alert('網絡錯誤'); });
+}
+
+function toggleEdit(catchId) {
+  var viewEl = document.getElementById('catch-view-' + catchId);
+  var editEl = document.getElementById('catch-edit-' + catchId);
+  var row = document.getElementById('catch-' + catchId);
+  var editBtn = row.querySelector('.edit-btn');
+  if (editEl.style.display === 'none') {
+    // Show edit mode
+    editEl.style.display = 'inline-flex';
+    viewEl.style.display = 'none';
+    editBtn.textContent = '💾';
+    editBtn.onclick = function() { saveEdit(catchId); };
+  } else {
+    // Cancel edit
+    editEl.style.display = 'none';
+    viewEl.style.display = 'block';
+    editBtn.textContent = '✎';
+    editBtn.onclick = function() { toggleEdit(catchId); };
+  }
+}
+
+function saveEdit(catchId) {
+  var fish = document.getElementById('edit-fish-' + catchId).value;
+  var count = document.getElementById('edit-count-' + catchId).value;
+  var weight = document.getElementById('edit-weight-' + catchId).value;
+  var data = {catch_id: catchId, fish: fish, count: parseInt(count)};
+  if (weight) data.weight = parseFloat(weight);
+  fetch('/api/catch/update', {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify(data)
+  })
+  .then(r => r.json())
+  .then(function(result) {
+    if (result.success) { location.reload(); }
+    else { alert('更新失敗: ' + (result.error || '未知錯誤')); }
+  })
+  .catch(function(err) { alert('網絡錯誤'); });
+}
+</script>
+{% endblock %}

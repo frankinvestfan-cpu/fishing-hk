@@ -1,0 +1,472 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>{% block title %}🎣 香港釣魚預測{% endblock %}</title>
+<style>
+:root {
+  --bg: #1a1a2e;
+  --card: #16213e;
+  --card-hover: #1a2744;
+  --accent: #0f3460;
+  --highlight: #e94560;
+  --text: #eee;
+  --text-dim: #8892a4;
+  --green: #4ecca3;
+  --yellow: #f0c040;
+  --blue: #4fc3f7;
+  --orange: #ff9800;
+  --red: #e94560;
+  --radius: 10px;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.6;
+  min-height: 100vh;
+}
+nav {
+  background: var(--card);
+  padding: 12px 16px;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+nav a { color: var(--text); text-decoration: none; }
+nav .logo { font-size: 1.2em; font-weight: bold; }
+nav .logo span { color: var(--highlight); }
+.container { max-width: 800px; margin: 0 auto; padding: 16px; }
+
+/* Cards */
+.card {
+  background: var(--card);
+  border-radius: var(--radius);
+  padding: 16px;
+  margin-bottom: 12px;
+  border: 1px solid rgba(255,255,255,0.05);
+  transition: background 0.2s;
+}
+.card:hover { background: var(--card-hover); }
+.card-link { text-decoration: none; color: inherit; display: block; }
+.card-link:hover .card { background: var(--card-hover); }
+
+/* Section headers */
+.section-title {
+  font-size: 1.1em;
+  font-weight: 600;
+  margin-bottom: 10px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* Score bar */
+.score-bar {
+  height: 8px;
+  background: rgba(255,255,255,0.1);
+  border-radius: 4px;
+  overflow: hidden;
+  margin: 6px 0;
+}
+.score-fill {
+  height: 100%;
+  border-radius: 4px;
+  transition: width 0.5s;
+}
+.score-excellent .score-fill { background: linear-gradient(90deg, #4ecca3, #00e676); }
+.score-good .score-fill { background: linear-gradient(90deg, #4fc3f7, #4ecca3); }
+.score-moderate .score-fill { background: linear-gradient(90deg, #f0c040, #ff9800); }
+.score-poor .score-fill { background: linear-gradient(90deg, #ff9800, #e94560); }
+
+/* Hourly bars */
+.hourly-row {
+  display: flex;
+  align-items: center;
+  padding: 4px 0;
+  gap: 8px;
+}
+.hourly-row .time {
+  width: 42px;
+  font-size: 0.85em;
+  color: var(--text-dim);
+  flex-shrink: 0;
+}
+.hourly-row .bar-wrap {
+  flex: 1;
+  height: 16px;
+  background: rgba(255,255,255,0.06);
+  border-radius: 3px;
+  overflow: hidden;
+}
+.hourly-row .bar-inner {
+  height: 100%;
+  border-radius: 3px;
+  transition: width 0.4s;
+}
+.hourly-row .score-num {
+  width: 36px;
+  text-align: right;
+  font-size: 0.85em;
+  flex-shrink: 0;
+}
+.hourly-row.now {
+  background: rgba(233,69,96,0.12);
+  border-radius: 4px;
+  padding: 4px 6px;
+  margin: 2px -6px;
+}
+
+/* Tide events */
+.tide-event {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 0;
+}
+.tide-event .time { width: 52px; color: var(--text-dim); }
+.tide-event .height { width: 60px; }
+.tide-high { color: var(--green); }
+.tide-low { color: var(--blue); }
+
+/* Spot grid */
+.district-header {
+  font-size: 1em;
+  font-weight: 600;
+  margin: 16px 0 8px;
+  color: var(--yellow);
+  padding-left: 4px;
+}
+.spot-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: 8px;
+  margin-bottom: 8px;
+}
+.spot-card {
+  background: var(--card);
+  border-radius: var(--radius);
+  padding: 10px 12px;
+  border: 1px solid rgba(255,255,255,0.05);
+  transition: all 0.2s;
+  text-decoration: none;
+  color: inherit;
+}
+.spot-card:hover {
+  background: var(--card-hover);
+  border-color: var(--highlight);
+  transform: translateY(-1px);
+}
+.spot-card .name-zh { font-weight: 600; font-size: 0.95em; }
+.spot-card .name-en { font-size: 0.75em; color: var(--text-dim); }
+.spot-card .rating { font-size: 0.85em; margin-top: 4px; }
+
+/* Badge */
+.badge {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-size: 0.75em;
+  font-weight: 600;
+}
+.badge-easy { background: rgba(78,204,163,0.2); color: var(--green); }
+.badge-medium { background: rgba(240,192,64,0.2); color: var(--yellow); }
+.badge-hard { background: rgba(233,69,96,0.2); color: var(--red); }
+.badge-beginner { background: rgba(78,204,163,0.2); color: var(--green); }
+
+/* Weather */
+.weather-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+.weather-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.9em;
+}
+.weather-item .label { color: var(--text-dim); min-width: 40px; }
+
+/* Solunar */
+.solunar-major { color: var(--red); font-weight: 600; }
+.solunar-minor { color: var(--yellow); }
+
+/* Week preview */
+.week-row {
+  display: flex;
+  align-items: center;
+  padding: 6px 0;
+  border-bottom: 1px solid rgba(255,255,255,0.05);
+  gap: 8px;
+  font-size: 0.9em;
+}
+.week-row:last-child { border-bottom: none; }
+.week-row .day { width: 60px; flex-shrink: 0; }
+.week-row .moon { width: 40px; flex-shrink: 0; }
+.week-row .range { flex: 1; }
+.week-hot { color: var(--green); }
+.week-ok { color: var(--blue); }
+
+/* Map link */
+.map-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: rgba(79,195,247,0.15);
+  color: var(--blue);
+  padding: 6px 12px;
+  border-radius: 6px;
+  text-decoration: none;
+  font-size: 0.9em;
+  margin-top: 4px;
+}
+.map-link:hover { background: rgba(79,195,247,0.25); }
+
+/* Fish tag */
+.fish-tag {
+  display: inline-block;
+  background: rgba(78,204,163,0.15);
+  color: var(--green);
+  padding: 2px 8px;
+  border-radius: 10px;
+  font-size: 0.8em;
+  margin: 2px;
+}
+
+/* Big score */
+.big-score {
+  font-size: 2.5em;
+  font-weight: bold;
+  line-height: 1;
+}
+.score-excellent-text { color: var(--green); }
+.score-good-text { color: var(--blue); }
+.score-moderate-text { color: var(--orange); }
+.score-poor-text { color: var(--red); }
+
+/* Responsive */
+@media (max-width: 480px) {
+  .container { padding: 12px; }
+  .spot-grid { grid-template-columns: repeat(2, 1fr); }
+  .weather-grid { grid-template-columns: 1fr; }
+  .big-score { font-size: 2em; }
+}
+
+/* Auto refresh */
+.refresh-info {
+  font-size: 0.75em;
+  color: var(--text-dim);
+  text-align: center;
+  margin-top: 16px;
+  padding: 8px;
+}
+
+/* Error */
+.error-msg {
+  background: rgba(233,69,96,0.15);
+  color: var(--red);
+  padding: 16px;
+  border-radius: var(--radius);
+  text-align: center;
+}
+
+/* Detail info rows */
+.info-row {
+  display: flex;
+  gap: 8px;
+  padding: 3px 0;
+  font-size: 0.9em;
+}
+.info-row .key { color: var(--text-dim); min-width: 70px; flex-shrink: 0; }
+.info-row .val { flex: 1; }
+
+/* Back link */
+.back-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  color: var(--text-dim);
+  text-decoration: none;
+  font-size: 0.9em;
+  margin-bottom: 12px;
+}
+.back-link:hover { color: var(--text); }
+
+/* Action buttons */
+.action-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--highlight);
+  color: #fff;
+  padding: 10px 20px;
+  border-radius: var(--radius);
+  text-decoration: none;
+  font-weight: 600;
+  margin: 4px;
+  border: none;
+  cursor: pointer;
+  font-size: 0.95em;
+}
+.action-btn:hover { opacity: 0.9; }
+.action-btn.secondary {
+  background: var(--accent);
+}
+
+/* Week overview grid */
+.week-overview-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 6px;
+}
+.day-card {
+  background: rgba(255,255,255,0.03);
+  border-radius: 8px;
+  padding: 8px 4px;
+  text-align: center;
+  border: 1px solid rgba(255,255,255,0.05);
+  transition: all 0.2s;
+}
+.day-card:hover { background: rgba(255,255,255,0.06); }
+.day-card.day-best {
+  border-color: var(--highlight);
+  background: rgba(233,69,96,0.08);
+}
+.day-card.day-today {
+  border-color: var(--blue);
+}
+.day-date { font-weight: 600; font-size: 0.95em; }
+.day-weekday { font-size: 0.75em; color: var(--text-dim); }
+.day-emoji { font-size: 1.2em; margin: 4px 0; }
+.day-score { font-size: 0.85em; font-weight: 600; }
+.day-tide { font-size: 0.7em; color: var(--text-dim); }
+.day-badge {
+  font-size: 0.65em;
+  background: var(--highlight);
+  color: #fff;
+  padding: 1px 6px;
+  border-radius: 8px;
+  margin-top: 2px;
+  display: inline-block;
+}
+
+/* Date selector */
+.date-selector {
+  display: flex;
+  gap: 6px;
+  overflow-x: auto;
+  padding-bottom: 4px;
+}
+.date-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 8px 12px;
+  background: rgba(255,255,255,0.05);
+  border-radius: 8px;
+  text-decoration: none;
+  color: var(--text);
+  border: 2px solid transparent;
+  transition: all 0.2s;
+  min-width: 52px;
+}
+.date-btn:hover { background: rgba(255,255,255,0.1); }
+.date-btn.date-selected {
+  border-color: var(--highlight);
+  background: rgba(233,69,96,0.1);
+}
+.date-btn.date-today {
+  border-color: var(--blue);
+}
+.date-btn.date-selected.date-today {
+  border-color: var(--highlight);
+}
+.date-btn-day { font-size: 0.75em; color: var(--text-dim); }
+.date-btn-num { font-weight: 600; font-size: 0.95em; }
+.date-today-dot {
+  font-size: 0.65em;
+  background: var(--blue);
+  color: #fff;
+  padding: 0px 4px;
+  border-radius: 4px;
+  margin-top: 2px;
+}
+
+/* Responsive overrides for week overview */
+@media (max-width: 480px) {
+  .week-overview-grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+  .date-btn {
+    padding: 6px 8px;
+    min-width: 44px;
+  }
+}
+.delete-btn {
+  background: none;
+  border: 1px solid rgba(233,69,96,0.3);
+  color: var(--red);
+  cursor: pointer;
+  border-radius: 4px;
+  padding: 2px 6px;
+  font-size: 0.8em;
+  transition: all 0.2s;
+}
+.delete-btn:hover {
+  background: var(--red);
+  color: #fff;
+}
+.edit-btn {
+  background: none;
+  border: 1px solid rgba(79,195,247,0.3);
+  color: var(--blue);
+  cursor: pointer;
+  border-radius: 4px;
+  padding: 2px 6px;
+  font-size: 0.8em;
+  transition: all 0.2s;
+}
+.edit-btn:hover {
+  background: var(--blue);
+  color: #fff;
+}
+.save-btn {
+  background: var(--green);
+  border: none;
+  color: #fff;
+  cursor: pointer;
+  border-radius: 4px;
+  padding: 2px 8px;
+  font-size: 0.8em;
+  transition: all 0.2s;
+}
+</style>
+</head>
+<body>
+<nav>
+  <a href="/" class="logo">🎣 <span>釣魚</span>預測</a>
+  <span style="font-size:0.8em;color:var(--text-dim)" id="clock"></span>
+</nav>
+<div class="container">
+{% block content %}{% endblock %}
+</div>
+<script>
+// Update clock
+function updateClock() {
+  const now = new Date();
+  const h = String(now.getHours()).padStart(2,'0');
+  const m = String(now.getMinutes()).padStart(2,'0');
+  document.getElementById('clock').textContent = h + ':' + m;
+}
+updateClock();
+setInterval(updateClock, 30000);
+</script>
+</body>
+</html>

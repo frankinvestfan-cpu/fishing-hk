@@ -1,0 +1,558 @@
+{
+  "spots": [
+    {
+      "id": " Aberdeen",
+      "name_en": "Aberdeen Promenade",
+      "name_zh": "香港仔海傍",
+      "district": "HK Island",
+      "lat": 22.2487,
+      "lng": 114.1547,
+      "type": "pier",
+      "fish": [
+        "鯛魚",
+        "烏頭",
+        "黃腲鱲",
+        "盲鰽"
+      ],
+      "season": "year_round",
+      "best_tide": "rising",
+      "difficulty": "beginner",
+      "notes": "設施完善，適合新手。夜釣烏頭好選擇。",
+      "rating": 6
+    },
+    {
+      "id": "causeway_bay",
+      "name_en": "Causeway Bay Typhoon Shelter",
+      "name_zh": "銅鑼灣避風塘",
+      "district": "HK Island",
+      "lat": 22.2827,
+      "lng": 114.1847,
+      "type": "typhoon_shelter",
+      "fish": [
+        "烏頭",
+        "黃腲鱲",
+        "鱲魚"
+      ],
+      "season": "year_round",
+      "best_tide": "rising",
+      "difficulty": "beginner",
+      "notes": "市區方便，魚獲一般但交通好。",
+      "rating": 5
+    },
+    {
+      "id": "shek_o",
+      "name_en": "Shek O",
+      "name_zh": "石澳",
+      "district": "HK Island",
+      "lat": 22.2148,
+      "lng": 114.3397,
+      "type": "rocky_shore",
+      "fish": [
+        "石斑",
+        "鯛魚",
+        "泥鯭",
+        "紅鮋"
+      ],
+      "season": "spring_summer",
+      "best_tide": "rising_falling",
+      "difficulty": "intermediate",
+      "notes": "礁石區好釣點，要留意大浪。春夏好季節。",
+      "rating": 7
+    },
+    {
+      "id": "big_wave_bay",
+      "name_en": "Big Wave Bay",
+      "name_zh": "大浪灣",
+      "district": "HK Island",
+      "lat": 22.2135,
+      "lng": 114.3415,
+      "type": "sandy_shore",
+      "fish": [
+        "沙鯭",
+        "白鱲",
+        "黃腲鱲"
+      ],
+      "season": "spring_summer",
+      "best_tide": "rising",
+      "difficulty": "beginner",
+      "notes": "沙灘釣，投釣為主。",
+      "rating": 5
+    },
+    {
+      "id": "lei_yue_mun",
+      "name_en": "Lei Yue Mun",
+      "name_zh": "鯉魚門",
+      "district": "Kowloon",
+      "lat": 22.2855,
+      "lng": 114.2445,
+      "type": "rocky_shore",
+      "fish": [
+        "石斑",
+        "鯛魚",
+        "黃腲鱲",
+        "火點"
+      ],
+      "season": "spring_autumn",
+      "best_tide": "rising_falling",
+      "difficulty": "intermediate",
+      "notes": "岩石位多，水流急。大潮時好釣。",
+      "rating": 7
+    },
+    {
+      "id": "cha_kwo_ling",
+      "name_en": "Cha Kwo Ling",
+      "name_zh": "茶果嶺",
+      "district": "Kowloon",
+      "lat": 22.3025,
+      "lng": 114.2315,
+      "type": "pier",
+      "fish": [
+        "烏頭",
+        "黃腲鱲",
+        "鱲魚"
+      ],
+      "season": "year_round",
+      "best_tide": "rising",
+      "difficulty": "beginner",
+      "notes": "碼頭釣，設施一般。",
+      "rating": 5
+    },
+    {
+      "id": "sam_dip_wong",
+      "name_en": "Sam Dip Wong (Tseung Kwan O)",
+      "name_zh": "三疊望",
+      "district": "Kowloon",
+      "lat": 22.3155,
+      "lng": 114.2615,
+      "type": "rocky_shore",
+      "fish": [
+        "石斑",
+        "鯛魚",
+        "泥鯭"
+      ],
+      "season": "spring_summer",
+      "best_tide": "rising_falling",
+      "difficulty": "intermediate",
+      "notes": "將軍澳岩岸，風景好。",
+      "rating": 6
+    },
+    {
+      "id": "tolo_harbour",
+      "name_en": "Tolo Harbour",
+      "name_zh": "吐露港",
+      "district": "NT East",
+      "lat": 22.4435,
+      "lng": 114.2715,
+      "type": "pier_shore",
+      "fish": [
+        "烏頭",
+        "黃腲鱲",
+        "鱲魚",
+        "白鱲"
+      ],
+      "season": "autumn_winter",
+      "best_tide": "rising",
+      "difficulty": "beginner",
+      "notes": "大埔海傍長廊，秋冬釣烏頭好地方。",
+      "rating": 7
+    },
+    {
+      "id": "tai_mei_tuk",
+      "name_en": "Tai Mei Tuk",
+      "name_zh": "大美督",
+      "district": "NT East",
+      "lat": 22.4505,
+      "lng": 114.2355,
+      "type": "pier_shore",
+      "fish": [
+        "烏頭",
+        "黃腲鱲",
+        "白鱲",
+        "鱲魚"
+      ],
+      "season": "autumn_winter",
+      "best_tide": "rising",
+      "difficulty": "beginner",
+      "notes": "船灣淡水湖旁，秋冬釣大烏頭。",
+      "rating": 8
+    },
+    {
+      "id": "three_fathoms_cove",
+      "name_en": "Three Fathoms Cove",
+      "name_zh": "三門仔",
+      "district": "NT East",
+      "lat": 22.4415,
+      "lng": 114.2985,
+      "type": "rocky_shore",
+      "fish": [
+        "石斑",
+        "鯛魚",
+        "黃腲鱲"
+      ],
+      "season": "spring_autumn",
+      "best_tide": "rising",
+      "difficulty": "intermediate",
+      "notes": "岩石釣點，水清時好釣。",
+      "rating": 7
+    },
+    {
+      "id": "sham_tseng",
+      "name_en": "Sham Tseng",
+      "name_zh": "深井",
+      "district": "NT West",
+      "lat": 22.3695,
+      "lng": 114.0665,
+      "type": "pier_shore",
+      "fish": [
+        "烏頭",
+        "黃腲鱲",
+        "鱲魚"
+      ],
+      "season": "autumn_winter",
+      "best_tide": "rising",
+      "difficulty": "beginner",
+      "notes": "深井海傍，秋冬好釣。燒鵝順便食。",
+      "rating": 6
+    },
+    {
+      "id": "castle_peak_bay",
+      "name_en": "Castle Peak Bay",
+      "name_zh": "青山灣",
+      "district": "NT West",
+      "lat": 22.3725,
+      "lng": 113.9675,
+      "type": "sandy_shore",
+      "fish": [
+        "沙鯭",
+        "白鱲",
+        "黃腲鱲"
+      ],
+      "season": "spring_summer",
+      "best_tide": "rising",
+      "difficulty": "beginner",
+      "notes": "沙灘投釣，適合新手。",
+      "rating": 5
+    },
+    {
+      "id": "cheung_chau",
+      "name_en": "Cheung Chau",
+      "name_zh": "長洲",
+      "district": "Islands",
+      "lat": 22.2105,
+      "lng": 114.0285,
+      "type": "rocky_shore",
+      "fish": [
+        "石斑",
+        "鯛魚",
+        "紅鮋",
+        "泥鯭",
+        "黃腲鱲"
+      ],
+      "season": "spring_summer",
+      "best_tide": "rising_falling",
+      "difficulty": "intermediate",
+      "notes": "好多人去釣，魚種多。北面岩石區好釣。",
+      "rating": 8
+    },
+    {
+      "id": "lamma_island",
+      "name_en": "Lamma Island",
+      "name_zh": "南丫島",
+      "district": "Islands",
+      "lat": 22.2055,
+      "lng": 114.1185,
+      "type": "rocky_shore",
+      "fish": [
+        "石斑",
+        "鯛魚",
+        "紅鮋",
+        "火點"
+      ],
+      "season": "spring_summer_autumn",
+      "best_tide": "rising_falling",
+      "difficulty": "intermediate",
+      "notes": "魚種豐富，岩石區釣石斑。索罟灣一帶好位。",
+      "rating": 8
+    },
+    {
+      "id": "lantau_tung_chung",
+      "name_en": "Tung Chung (Lantau)",
+      "name_zh": "東涌",
+      "district": "Islands",
+      "lat": 22.2885,
+      "lng": 113.9435,
+      "type": "pier_shore",
+      "fish": [
+        "烏頭",
+        "黃腲鱲",
+        "鱲魚",
+        "白鱲"
+      ],
+      "season": "autumn_winter",
+      "best_tide": "rising",
+      "difficulty": "beginner",
+      "notes": "東涌海傍，秋冬釣烏頭。",
+      "rating": 6
+    },
+    {
+      "id": "ping_chau",
+      "name_en": "Ping Chau (Tung Ping Chau)",
+      "name_zh": "東平洲",
+      "district": "Islands",
+      "lat": 22.5415,
+      "lng": 114.4355,
+      "type": "rocky_shore",
+      "fish": [
+        "石斑",
+        "鯛魚",
+        "紅鮋",
+        "火點",
+        "泥鯭"
+      ],
+      "season": "spring_summer",
+      "best_tide": "rising_falling",
+      "difficulty": "advanced",
+      "notes": "水質好，魚種多但要坐船。周末露營釣魚好選擇。",
+      "rating": 9
+    },
+    {
+      "id": "crooked_island",
+      "name_en": "Kat O (Crooked Island)",
+      "name_zh": "吉澳",
+      "district": "Islands",
+      "lat": 22.4905,
+      "lng": 114.3355,
+      "type": "rocky_shore",
+      "fish": [
+        "石斑",
+        "紅鮋",
+        "鯛魚",
+        "火點"
+      ],
+      "season": "spring_summer_autumn",
+      "best_tide": "rising_falling",
+      "difficulty": "advanced",
+      "notes": "東北水域，水質好。要坐街渡。大魚多。",
+      "rating": 8
+    },
+    {
+      "id": " victoria_harbour",
+      "name_en": "Victoria Harbour Piers",
+      "name_zh": "維港碼頭",
+      "district": "Central",
+      "lat": 22.2935,
+      "lng": 114.1695,
+      "type": "pier",
+      "fish": [
+        "烏頭",
+        "黃腲鱲"
+      ],
+      "season": "year_round",
+      "best_tide": "rising",
+      "difficulty": "beginner",
+      "notes": "中環/灣仔碼頭，方便但魚獲一般。注意水質。",
+      "rating": 4
+    }
+  ],
+  "fish_species": {
+    "烏頭": {
+      "en": "Grey Mullet",
+      "season": [
+        "10",
+        "11",
+        "12",
+        "1",
+        "2",
+        "3"
+      ],
+      "best_time": [
+        "dawn",
+        "dusk"
+      ],
+      "best_tide": "rising",
+      "difficulty": "beginner",
+      "avg_size": "1-3斤"
+    },
+    "黃腲鱲": {
+      "en": "Yellowfin Seabream",
+      "season": [
+        "3",
+        "4",
+        "5",
+        "6",
+        "7",
+        "8"
+      ],
+      "best_time": [
+        "dawn",
+        "dusk"
+      ],
+      "best_tide": "rising",
+      "difficulty": "intermediate",
+      "avg_size": "0.5-2斤"
+    },
+    "石斑": {
+      "en": "Grouper",
+      "season": [
+        "4",
+        "5",
+        "6",
+        "7",
+        "8",
+        "9",
+        "10"
+      ],
+      "best_time": [
+        "dawn",
+        "dusk",
+        "night"
+      ],
+      "best_tide": "rising_falling",
+      "difficulty": "intermediate",
+      "avg_size": "1-5斤"
+    },
+    "鯛魚": {
+      "en": "Seabream",
+      "season": [
+        "3",
+        "4",
+        "5",
+        "6",
+        "7",
+        "8",
+        "9"
+      ],
+      "best_time": [
+        "dawn",
+        "dusk"
+      ],
+      "best_tide": "rising",
+      "difficulty": "intermediate",
+      "avg_size": "0.5-3斤"
+    },
+    "紅鮋": {
+      "en": "Red Snapper",
+      "season": [
+        "5",
+        "6",
+        "7",
+        "8",
+        "9"
+      ],
+      "best_time": [
+        "dawn",
+        "dusk",
+        "night"
+      ],
+      "best_tide": "rising_falling",
+      "difficulty": "advanced",
+      "avg_size": "1-5斤"
+    },
+    "白鱲": {
+      "en": "White Seabream",
+      "season": [
+        "10",
+        "11",
+        "12",
+        "1",
+        "2"
+      ],
+      "best_time": [
+        "dawn",
+        "dusk"
+      ],
+      "best_tide": "rising",
+      "difficulty": "intermediate",
+      "avg_size": "0.5-2斤"
+    },
+    "泥鯭": {
+      "en": "Rabbitfish",
+      "season": [
+        "3",
+        "4",
+        "5",
+        "6",
+        "7",
+        "8",
+        "9"
+      ],
+      "best_time": [
+        "dawn",
+        "dusk"
+      ],
+      "best_tide": "rising",
+      "difficulty": "beginner",
+      "avg_size": "0.3-1斤"
+    },
+    "鱲魚": {
+      "en": "Bream",
+      "season": [
+        "9",
+        "10",
+        "11",
+        "12",
+        "1",
+        "2"
+      ],
+      "best_time": [
+        "dawn",
+        "dusk",
+        "night"
+      ],
+      "best_tide": "rising",
+      "difficulty": "intermediate",
+      "avg_size": "0.5-2斤"
+    },
+    "火點": {
+      "en": "Lattice Soldierfish",
+      "season": [
+        "5",
+        "6",
+        "7",
+        "8",
+        "9"
+      ],
+      "best_time": [
+        "night"
+      ],
+      "best_tide": "rising_falling",
+      "difficulty": "intermediate",
+      "avg_size": "0.5-2斤"
+    },
+    "沙鯭": {
+      "en": "Sand Borer",
+      "season": [
+        "4",
+        "5",
+        "6",
+        "7",
+        "8"
+      ],
+      "best_time": [
+        "dawn",
+        "dusk"
+      ],
+      "best_tide": "rising",
+      "difficulty": "beginner",
+      "avg_size": "0.2-0.5斤"
+    },
+    "盲鰽": {
+      "en": "Barramundi",
+      "season": [
+        "5",
+        "6",
+        "7",
+        "8",
+        "9"
+      ],
+      "best_time": [
+        "dawn",
+        "dusk",
+        "night"
+      ],
+      "best_tide": "rising",
+      "difficulty": "advanced",
+      "avg_size": "2-10斤"
+    }
+  }
+}
