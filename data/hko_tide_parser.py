@@ -1,10 +1,15 @@
 #!/usr/bin/env python3
 """
-HKO Tide Data Parser v2
+HKO Tide Data Parser v3
 Parses official HKO Tide Table PDF with robust handling of split lines.
+Also supports pre-parsed JSON data for environments without PyMuPDF.
 """
 
-import fitz
+try:
+    import fitz
+except ImportError:
+    fitz = None  # PyMuPDF not available; will use JSON fallback
+
 import json
 import re
 from datetime import date
@@ -34,7 +39,20 @@ MONTH_MAP = {
 }
 
 def parse_station(pdf_path, station="QB"):
-    """Parse tide data for a station from HKO PDF."""
+    """Parse tide data for a station from HKO PDF or pre-parsed JSON."""
+    # Try JSON first (faster, no PyMuPDF dependency)
+    json_path = Path(__file__).parent / f"hko_tides_{station}_2026.json"
+    if json_path.exists():
+        with open(json_path, 'r', encoding='utf-8') as f:
+            data = json.load(f)
+        if data:
+            return data
+    
+    # Fallback to PDF parsing
+    if fitz is None:
+        print(f"⚠️ PyMuPDF not available, and no JSON for station {station}")
+        return {}
+    
     doc = fitz.open(pdf_path)
     info = STATIONS[station]
     start_pg, end_pg = info["pages"]

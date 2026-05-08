@@ -41,18 +41,22 @@ def get_tide_data(station="QB"):
     """Get tide data for a specific station. Cached per station."""
     global _tide_cache
     if station not in _tide_cache:
-        pdf_path = _find_tide_pdf()
-        if pdf_path:
-            _tide_cache[station] = parse_station(pdf_path, station)
+        # Try JSON first (works without PyMuPDF)
+        json_path = os.path.join(os.path.dirname(__file__), 'data', f'hko_tides_{station}_2026.json')
+        if os.path.exists(json_path):
+            with open(json_path, 'r', encoding='utf-8') as f:
+                _tide_cache[station] = json.load(f)
         else:
-            _tide_cache[station] = {}
+            # Fallback to PDF
+            pdf_path = _find_tide_pdf()
+            if pdf_path:
+                _tide_cache[station] = parse_station(pdf_path, station)
+            else:
+                _tide_cache[station] = {}
     return _tide_cache[station]
 
 def get_all_tide_data():
     """Load tide data for all available stations."""
-    pdf_path = _find_tide_pdf()
-    if not pdf_path:
-        return {"QB": {}}
     results = {}
     for st in STATIONS:
         results[st] = get_tide_data(st)
