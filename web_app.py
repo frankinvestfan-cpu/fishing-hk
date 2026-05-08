@@ -90,6 +90,12 @@ def get_spot_data(spot_id, target_date=None):
     # 7-day tide preview
     cn_days = ['一', '二', '三', '四', '五', '六', '日']
     week_preview = []
+    # Build forecast lookup by date string
+    fc_by_date = {}
+    if weather:
+        for fc in weather.get('forecast', []):
+            fc_by_date[fc.get('date', '')] = fc
+    
     for i in range(7):
         d = target_date + timedelta(days=i)
         d_range = get_tide_range(tide, d) if tide else None
@@ -99,6 +105,24 @@ def get_spot_data(spot_id, target_date=None):
         best_win = None
         if d_windows:
             best_win = sorted(d_windows, key=lambda x: x['score'], reverse=True)[0]
+        
+        # Get sea state for this day
+        d_sea = None
+        d_str = d.strftime('%Y-%m-%d')
+        if d == date.today() and weather and 'current' in weather:
+            d_sea = estimate_spot_sea_state(
+                weather['current'].get('wind_kmph', 0),
+                weather['current'].get('wind_dir', ''),
+                spot_id
+            )
+        elif d_str in fc_by_date:
+            fc = fc_by_date[d_str]
+            d_sea = estimate_spot_sea_state(
+                fc.get('avg_wind_kmph', 0),
+                fc.get('avg_wind_dir', ''),
+                spot_id
+            )
+        
         week_preview.append({
             "date": d,
             "day_zh": cn_days[d.weekday()],
@@ -106,6 +130,9 @@ def get_spot_data(spot_id, target_date=None):
             "best_window": best_win,
             "moon_phase": d_moon['phase_name'],
             "solunar_rating": solunar_r,
+            "sea_state": d_sea,
+            "wind_kmph": fc_by_date.get(d_str, {}).get('avg_wind_kmph', weather['current']['wind_kmph'] if weather and 'current' in weather else 0),
+            "wind_dir": fc_by_date.get(d_str, {}).get('avg_wind_dir', weather['current']['wind_dir'] if weather and 'current' in weather else ''),
         })
 
     # Seasonal fish
@@ -114,13 +141,36 @@ def get_spot_data(spot_id, target_date=None):
     spot_fish_seasonal = {k: v for k, v in seasonal.items() if k in spot['fish']}
 
     # Spot-specific sea state (considers wind direction + terrain exposure)
+    # For today use real-time wind, for future dates use forecast avg wind
     sea_state = None
-    if weather and 'current' in weather:
-        sea_state = estimate_spot_sea_state(
-            weather['current'].get('wind_kmph', 0),
-            weather['current'].get('wind_dir', ''),
-            spot_id
-        )
+    if weather:
+        if target_date == date.today() and 'current' in weather:
+            sea_state = estimate_spot_sea_state(
+                weather['current'].get('wind_kmph', 0),
+                weather['current'].get('wind_dir', ''),
+                spot_id
+            )
+        else:
+            # Find forecast for target date
+            from datetime import datetime as dt
+            target_str = target_date.strftime('%Y-%m-%d')
+            for fc in weather.get('forecast', []):
+                if fc.get('date') == target_str:
+                    sea_state = estimate_spot_sea_state(
+                        fc.get('avg_wind_kmph', 0),
+                        fc.get('avg_wind_dir', ''),
+                        spot_id
+                    )
+                    break
+            if not sea_state and 'current' in weather:
+                # Fallback to current for dates without forecast
+                sea_state = estimate_spot_sea_state(
+                    weather['current'].get('wind_kmph', 0),
+                    weather['current'].get('wind_dir', ''),
+                    spot_id
+                )
+                if sea_state:
+                    sea_state['spot_note'] = '⚠️ 預測數據不足，顯示即時海浪' + (f' ({sea_state.get("spot_note", "")}' if sea_state.get('spot_note') else '')
 
     return {
         "spot": spot,

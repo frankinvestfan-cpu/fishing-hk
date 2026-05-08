@@ -42,11 +42,23 @@ def get_weather(location="Hong+Kong"):
     }
     
     for day in weather[:3]:
+        hourly = day.get("hourly", [])
+        avg_wind = 0
+        avg_wind_dir = ""
+        if hourly:
+            winds = [int(h.get("windspeedKmph", 0)) for h in hourly]
+            dirs = [h.get("winddir16Point", "") for h in hourly]
+            avg_wind = sum(winds) // len(winds) if winds else 0
+            from collections import Counter
+            dir_counts = Counter(dirs)
+            avg_wind_dir = dir_counts.most_common(1)[0][0] if dir_counts else ""
         result["forecast"].append({
             "date": day.get("date", ""),
             "max_temp_c": int(day.get("maxtempC", 0)),
             "min_temp_c": int(day.get("mintempC", 0)),
-            "avg_pressure": int(day.get("hourly", [{}])[0].get("pressure", 0)) if day.get("hourly") else 0,
+            "avg_pressure": int(hourly[0].get("pressure", 0)) if hourly else 0,
+            "avg_wind_kmph": avg_wind,
+            "avg_wind_dir": avg_wind_dir,
             "sunrise": day.get("astronomy", [{}])[0].get("sunrise", "") if day.get("astronomy") else "",
             "sunset": day.get("astronomy", [{}])[0].get("sunset", "") if day.get("astronomy") else "",
             "moon_phase": day.get("astronomy", [{}])[0].get("moon_phase", "") if day.get("astronomy") else "",

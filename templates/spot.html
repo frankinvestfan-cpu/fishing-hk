@@ -250,6 +250,9 @@
     {% else %}
     <span class="range">⚠️ 無數據</span>
     {% endif %}
+    {% if day.sea_state %}
+    <span style="font-size:0.8em;color:var(--text-dim);">🌊{{ day.sea_state.state_zh }}</span>
+    {% endif %}
   </div>
   {% endfor %}
 </div>
