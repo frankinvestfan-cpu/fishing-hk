@@ -1,1 +1,1 @@
-web: gunicorn web_app:app --bind 0.0.0.0:$PORT --chdir /opt/render/project/src
+web: gunicorn web_app:app --bind 0.0.0.0:$PORT
