@@ -15,7 +15,7 @@ sys.path.insert(0, str(Path(__file__).parent))
 
 from data.moon_phase import moon_phase_calc, next_best_fishing_days
 from data.fishing_spots import FISHING_SPOTS, get_seasonal_fish
-from data.weather_data import get_weather, pressure_score, wind_score, estimate_sea_state
+from data.weather_data import get_weather, pressure_score, wind_score, estimate_sea_state, estimate_spot_sea_state
 from data.solunar import solunar_periods, solunar_activity_score, daily_solunar_rating
 from data.hko_tide_parser import get_tide_for_date, get_tide_range, find_best_fishing_tides, STATIONS, get_tide_station_for_spot
 from data.terrain import get_terrain_info
@@ -113,10 +113,14 @@ def get_spot_data(spot_id, target_date=None):
     seasonal = get_seasonal_fish(month)
     spot_fish_seasonal = {k: v for k, v in seasonal.items() if k in spot['fish']}
 
-    # Sea state estimate
+    # Spot-specific sea state (considers wind direction + terrain exposure)
     sea_state = None
     if weather and 'current' in weather:
-        sea_state = estimate_sea_state(weather['current'].get('wind_kmph', 0))
+        sea_state = estimate_spot_sea_state(
+            weather['current'].get('wind_kmph', 0),
+            weather['current'].get('wind_dir', ''),
+            spot_id
+        )
 
     return {
         "spot": spot,

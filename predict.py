@@ -588,10 +588,13 @@ def format_spot_guide(spot_id, target_date=None, fish_target=None):
         print(f'   氣壓: {c["pressure_hpa"]}hPa | 風: {c["wind_kmph"]}km/h {c["wind_dir"]}')
     
     # Sea state estimate
-    from data.weather_data import estimate_sea_state
+    from data.weather_data import estimate_sea_state, estimate_spot_sea_state
     if weather and 'current' in weather:
-        sea = estimate_sea_state(weather['current'].get('wind_kmph', 0))
+        c = weather['current']
+        sea = estimate_spot_sea_state(c.get('wind_kmph', 0), c.get('wind_dir', ''), spot_id)
         print(f'   🌊 海浪: {sea["state_zh"]} 浪高約{sea["wave"]} {sea["risk"]}')
+        if sea.get('spot_note'):
+            print(f'      {sea["spot_note"]}')
     
     # === Today's fish ===
     month = str(target_date.month)

@@ -207,9 +207,11 @@
   </div>
   {% if sea_state %}
   <div style="margin-top:6px;padding:8px;background:rgba(255,255,255,0.05);border-radius:6px;font-size:0.9em;">
-    <span>🌊 海浪狀態：<strong>{{ sea_state.state_zh }}</strong></span>
-    <span style="margin-left:8px;">浪高約{{ sea_state.wave }}</span>
+    <span>🌊 海浪狀態：<strong>{{ sea_state.state_zh }}</strong> 浪高約{{ sea_state.wave }}</span>
     <span style="margin-left:8px;">{{ sea_state.risk }}</span>
+    {% if sea_state.spot_note %}
+    <div style="margin-top:4px;font-size:0.85em;color:var(--text-dim);">{{ sea_state.spot_note }}</div>
+    {% endif %}
   </div>
   {% endif %}
   <div style="margin-top:6px;font-size:0.85em;color:var(--text-dim);">{{ c.weather_desc }}</div>
