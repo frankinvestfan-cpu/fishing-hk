@@ -283,13 +283,13 @@ def spot_page(spot_id):
     data['spot_catches'] = spot_catches
     data['spot_stats'] = spot_stats
 
-    # Build catch form options
+    # Build catch form options (Chinese + English)
     month = str(target_date.month)
     seasonal = get_seasonal_fish(month)
-    fish_options = list(seasonal.keys())
-    method_options = ['磯釣', '投釣', '沉底', '浮波']
-    bait_options = ['活蝦', '青蟲', '魚肉', '魚仔', '蝦肉']
-    tide_options = ['漲潮', '退潮', '高潮', '低潮']
+    fish_options = [f"{k} ({v['en']})" for k, v in seasonal.items()]
+    method_options = ['磯釣 (Rock fishing)', '投釣 (Casting)', '沉底 (Bottom)', '浮波 (Float)']
+    bait_options = ['活蝦 (Live shrimp)', '青蟲 (Sandworm)', '魚肉 (Fish meat)', '魚仔 (Small fish)', '蝦肉 (Shrimp meat)']
+    tide_options = ['漲潮 (Rising)', '退潮 (Falling)', '高潮 (High)', '低潮 (Low)']
     data['fish_options'] = fish_options
     data['method_options'] = method_options
     data['bait_options'] = bait_options
@@ -320,6 +320,7 @@ def api_catch():
             bait=data.get('bait'),
             tide_state=data.get('tide_state'),
             notes=data.get('notes'),
+            rig=data.get('rig'),
             catch_date=data.get('date'),
         )
         return jsonify({"success": True, "record": record})

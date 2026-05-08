@@ -279,11 +279,13 @@
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
       <div>
         <label style="font-size:0.85em;color:var(--text-dim);">魚種 *</label>
-        <select id="catchFish" style="width:100%;padding:6px 8px;background:var(--bg);color:var(--text);border:1px solid rgba(255,255,255,0.15);border-radius:6px;font-size:0.9em;">
+        <select id="catchFish" onchange="toggleCustomFish()" style="width:100%;padding:6px 8px;background:var(--bg);color:var(--text);border:1px solid rgba(255,255,255,0.15);border-radius:6px;font-size:0.9em;">
           {% for f in fish_options %}
           <option value="{{ f }}">{{ f }}</option>
           {% endfor %}
+          <option value="__custom__">✏️ 其他（自訂）</option>
         </select>
+        <input type="text" id="catchFishCustom" placeholder="輸入魚種名稱" style="display:none;width:100%;padding:6px 8px;background:var(--bg);color:var(--text);border:1px solid rgba(255,255,255,0.15);border-radius:6px;font-size:0.9em;margin-top:4px;">
       </div>
       <div>
         <label style="font-size:0.85em;color:var(--text-dim);">數量 *</label>
@@ -326,6 +328,10 @@
       </div>
     </div>
     <div>
+      <label style="font-size:0.85em;color:var(--text-dim);">釣組 (Rig)</label>
+      <input type="text" id="catchRig" placeholder="例如：2號子線、0.8號主線、5號鈎" style="width:100%;padding:6px 8px;background:var(--bg);color:var(--text);border:1px solid rgba(255,255,255,0.15);border-radius:6px;font-size:0.9em;">
+    </div>
+    <div>
       <label style="font-size:0.85em;color:var(--text-dim);">備註</label>
       <input type="text" id="catchNotes" placeholder="選填" style="width:100%;padding:6px 8px;background:var(--bg);color:var(--text);border:1px solid rgba(255,255,255,0.15);border-radius:6px;font-size:0.9em;">
     </div>
@@ -355,6 +361,7 @@
       {% if c.get('method') or c.get('bait') %}
       <span style="color:var(--text-dim);font-size:0.85em;">{{ c.get('bait', '') }}{% if c.get('bait') and c.get('method') %}/{% endif %}{{ c.get('method', '') }}</span>
       {% endif %}
+      {% if c.get('rig') %}<span style="color:var(--yellow);font-size:0.85em;">🎣{{ c.rig }}</span>{% endif %}
       {% if c.get('tide_state') %}<span style="color:var(--blue);font-size:0.85em;">🌊{{ c.tide_state }}</span>{% endif %}
     </div>
     <div id="catch-edit-{{ c.get('id', '') }}" style="display:none;">
@@ -389,9 +396,12 @@ setTimeout(function(){ location.reload(); }, 30 * 60 * 1000);
 // Catch form submission
 document.getElementById('catchForm').addEventListener('submit', function(e) {
   e.preventDefault();
+  var fishSelect = document.getElementById('catchFish').value;
+  var fishValue = fishSelect === '__custom__' ? document.getElementById('catchFishCustom').value.trim() : fishSelect;
+  if (!fishValue) { alert('請輸入魚種'); return; }
   var data = {
     spot_id: document.getElementById('catchSpot').value,
-    fish: document.getElementById('catchFish').value,
+    fish: fishValue,
     count: document.getElementById('catchCount').value,
     date: document.getElementById('catchDate').value,
   };
@@ -403,6 +413,8 @@ document.getElementById('catchForm').addEventListener('submit', function(e) {
   if (bait) data.bait = bait;
   var tide = document.getElementById('catchTide').value;
   if (tide) data.tide_state = tide;
+  var rig = document.getElementById('catchRig').value;
+  if (rig) data.rig = rig;
   var notes = document.getElementById('catchNotes').value;
   if (notes) data.notes = notes;
 
@@ -492,6 +504,18 @@ function saveEdit(catchId) {
     else { alert('更新失敗: ' + (result.error || '未知錯誤')); }
   })
   .catch(function(err) { alert('網絡錯誤'); });
+}
+
+function toggleCustomFish() {
+  var select = document.getElementById('catchFish');
+  var custom = document.getElementById('catchFishCustom');
+  if (select.value === '__custom__') {
+    custom.style.display = 'block';
+    custom.focus();
+  } else {
+    custom.style.display = 'none';
+    custom.value = '';
+  }
 }
 </script>
 {% endblock %}

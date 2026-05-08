@@ -52,7 +52,7 @@ def _resolve_spot(query):
 
 
 def log_catch(spot_id, fish, count, weight=None, method=None, bait=None,
-              tide_state=None, time=None, notes=None, catch_date=None):
+              tide_state=None, time=None, notes=None, rig=None, catch_date=None):
     """
     Add a catch record.
     
@@ -94,6 +94,8 @@ def log_catch(spot_id, fish, count, weight=None, method=None, bait=None,
         record["time"] = time
     if notes:
         record["notes"] = notes
+    if rig:
+        record["rig"] = rig
     
     # Generate unique ID
     from datetime import datetime
