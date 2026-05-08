@@ -15,7 +15,7 @@ sys.path.insert(0, str(Path(__file__).parent))
 
 from data.moon_phase import moon_phase_calc, next_best_fishing_days
 from data.fishing_spots import FISHING_SPOTS, get_seasonal_fish
-from data.weather_data import get_weather, pressure_score, wind_score, estimate_sea_state, estimate_spot_sea_state
+from data.weather_data import get_weather, pressure_score, wind_score, estimate_sea_state, estimate_spot_sea_state, get_hko_forecast
 from data.solunar import solunar_periods, solunar_activity_score, daily_solunar_rating
 from data.hko_tide_parser import get_tide_for_date, get_tide_range, find_best_fishing_tides, STATIONS, get_tide_station_for_spot
 from data.terrain import get_terrain_info
@@ -90,12 +90,15 @@ def get_spot_data(spot_id, target_date=None):
     # 7-day tide preview
     cn_days = ['一', '二', '三', '四', '五', '六', '日']
     week_preview = []
-    # Build forecast lookup by date string
+    # Build forecast lookup by date string (wttr.in 3-day)
     fc_by_date = {}
     if weather:
         for fc in weather.get('forecast', []):
             fc_by_date[fc.get('date', '')] = fc
     
+    # HKO 9-day forecast for extended wind data
+    hko_forecast = get_hko_forecast()
+
     for i in range(7):
         d = target_date + timedelta(days=i)
         d_range = get_tide_range(tide, d) if tide else None
@@ -108,20 +111,38 @@ def get_spot_data(spot_id, target_date=None):
         
         # Get sea state for this day
         d_sea = None
+        d_wind = None
+        d_wind_dir = None
         d_str = d.strftime('%Y-%m-%d')
+        
         if d == date.today() and weather and 'current' in weather:
+            # Today: use real-time wind
             d_sea = estimate_spot_sea_state(
                 weather['current'].get('wind_kmph', 0),
                 weather['current'].get('wind_dir', ''),
                 spot_id
             )
+            d_wind = weather['current']['wind_kmph']
+            d_wind_dir = weather['current']['wind_dir']
         elif d_str in fc_by_date:
+            # Days 2-3: use wttr.in forecast
             fc = fc_by_date[d_str]
             d_sea = estimate_spot_sea_state(
                 fc.get('avg_wind_kmph', 0),
                 fc.get('avg_wind_dir', ''),
                 spot_id
             )
+            d_wind = fc.get('avg_wind_kmph', 0)
+            d_wind_dir = fc.get('avg_wind_dir', '')
+        elif d_str in hko_forecast:
+            # Days 4-9: use HKO 9-day forecast
+            hko = hko_forecast[d_str]
+            d_wind = hko.get('wind_kmh')
+            d_wind_dir = hko.get('wind_dir', '')
+            if d_wind and d_wind_dir:
+                d_sea = estimate_spot_sea_state(d_wind, d_wind_dir, spot_id)
+                if d_sea:
+                    d_sea['source'] = 'HKO預報'
         
         week_preview.append({
             "date": d,
@@ -131,8 +152,8 @@ def get_spot_data(spot_id, target_date=None):
             "moon_phase": d_moon['phase_name'],
             "solunar_rating": solunar_r,
             "sea_state": d_sea,
-            "wind_kmph": fc_by_date.get(d_str, {}).get('avg_wind_kmph', weather['current']['wind_kmph'] if weather and 'current' in weather else 0),
-            "wind_dir": fc_by_date.get(d_str, {}).get('avg_wind_dir', weather['current']['wind_dir'] if weather and 'current' in weather else ''),
+            "wind_kmph": d_wind,
+            "wind_dir": d_wind_dir,
         })
 
     # Seasonal fish
@@ -141,36 +162,47 @@ def get_spot_data(spot_id, target_date=None):
     spot_fish_seasonal = {k: v for k, v in seasonal.items() if k in spot['fish']}
 
     # Spot-specific sea state (considers wind direction + terrain exposure)
-    # For today use real-time wind, for future dates use forecast avg wind
     sea_state = None
-    if weather:
-        if target_date == date.today() and 'current' in weather:
+    target_str = target_date.strftime('%Y-%m-%d')
+    
+    if target_date == date.today() and weather and 'current' in weather:
+        # Today: real-time wind
+        sea_state = estimate_spot_sea_state(
+            weather['current'].get('wind_kmph', 0),
+            weather['current'].get('wind_dir', ''),
+            spot_id
+        )
+    elif weather:
+        # Try wttr.in forecast first
+        fc_found = None
+        for fc in weather.get('forecast', []):
+            if fc.get('date') == target_str:
+                fc_found = fc
+                break
+        if fc_found:
+            sea_state = estimate_spot_sea_state(
+                fc_found.get('avg_wind_kmph', 0),
+                fc_found.get('avg_wind_dir', ''),
+                spot_id
+            )
+        elif hko_forecast and target_str in hko_forecast:
+            # Try HKO 9-day forecast
+            hko = hko_forecast[target_str]
+            if hko.get('wind_kmh') and hko.get('wind_dir'):
+                sea_state = estimate_spot_sea_state(
+                    hko['wind_kmh'], hko['wind_dir'], spot_id
+                )
+                if sea_state:
+                    sea_state['source'] = 'HKO預報'
+        if not sea_state and 'current' in weather:
+            # Fallback to current wind
             sea_state = estimate_spot_sea_state(
                 weather['current'].get('wind_kmph', 0),
                 weather['current'].get('wind_dir', ''),
                 spot_id
             )
-        else:
-            # Find forecast for target date
-            from datetime import datetime as dt
-            target_str = target_date.strftime('%Y-%m-%d')
-            for fc in weather.get('forecast', []):
-                if fc.get('date') == target_str:
-                    sea_state = estimate_spot_sea_state(
-                        fc.get('avg_wind_kmph', 0),
-                        fc.get('avg_wind_dir', ''),
-                        spot_id
-                    )
-                    break
-            if not sea_state and 'current' in weather:
-                # Fallback to current for dates without forecast
-                sea_state = estimate_spot_sea_state(
-                    weather['current'].get('wind_kmph', 0),
-                    weather['current'].get('wind_dir', ''),
-                    spot_id
-                )
-                if sea_state:
-                    sea_state['spot_note'] = '⚠️ 預測數據不足，顯示即時海浪' + (f' ({sea_state.get("spot_note", "")}' if sea_state.get('spot_note') else '')
+            if sea_state:
+                sea_state['spot_note'] = '⚠️ 預測數據不足，顯示即時海浪'
 
     return {
         "spot": spot,

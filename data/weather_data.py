@@ -2,11 +2,85 @@
 """
 Weather Data Fetcher for Fishing
 Gets atmospheric pressure, wind, temperature from wttr.in
+HKO 9-day forecast for extended wind data
 """
 
 import requests
 import json
-from datetime import datetime
+import re
+from datetime import datetime, date, timedelta
+from collections import Counter
+
+# Beaufort force to average wind speed (km/h)
+_BEAUFORT_KMH = {0: 0, 1: 3, 2: 8, 3: 15, 4: 25, 5: 35, 6: 45, 7: 55, 8: 68, 9: 80, 10: 95, 11: 110, 12: 125}
+
+# 16-point wind direction to degrees
+_WIND_DIR_DEG = {
+    'N': 0, 'NNE': 22.5, 'NE': 45, 'ENE': 67.5,
+    'E': 90, 'ESE': 112.5, 'SE': 135, 'SSE': 157.5,
+    'S': 180, 'SSW': 202.5, 'SW': 225, 'WSW': 247.5,
+    'W': 270, 'WNW': 292.5, 'NW': 315, 'NNW': 337.5,
+}
+
+
+def parse_hko_wind(wind_str):
+    """Parse HKO wind string like 'East force 4 to 5' into (km/h, direction)."""
+    if not wind_str:
+        return None, None
+    
+    dir_map = {
+        'north to northeast': 'NNE', 'south to southeast': 'SSE',
+        'east to southeast': 'ESE', 'west to southwest': 'WSW',
+        'south to southwest': 'SSW', 'east to northeast': 'ENE',
+        'north to northwest': 'NNW', 'west to northwest': 'WNW',
+        'north': 'N', 'south': 'S', 'east': 'E', 'west': 'W',
+        'northeast': 'NE', 'northwest': 'NW', 'southeast': 'SE', 'southwest': 'SW',
+    }
+    direction = None
+    for name, code in sorted(dir_map.items(), key=lambda x: -len(x[0])):
+        if name in wind_str.lower():
+            direction = code
+            break
+    
+    forces = [int(x) for x in re.findall(r'force\s+(\d+)', wind_str.lower())]
+    if forces:
+        avg_force = sum(forces) / len(forces)
+        wind_kmh = _BEAUFORT_KMH.get(round(avg_force), 0)
+    else:
+        wind_kmh = None
+    
+    return wind_kmh, direction
+
+
+def get_hko_forecast():
+    """Fetch HKO 9-day forecast for extended wind data."""
+    try:
+        resp = requests.get('https://www.hko.gov.hk/wxinfo/json/one_json.xml', timeout=10)
+        resp.raise_for_status()
+        data = resp.json()
+        f9d = data.get('F9D', {})
+        forecasts = f9d.get('WeatherForecast', [])
+        
+        result = {}
+        for fc in forecasts:
+            date_str = fc.get('ForecastDate', '')
+            if not date_str:
+                continue
+            formatted = f'{date_str[:4]}-{date_str[4:6]}-{date_str[6:]}'
+            
+            wind_str = fc.get('ForecastWind', '')
+            wind_kmh, wind_dir = parse_hko_wind(wind_str)
+            
+            result[formatted] = {
+                'wind_kmh': wind_kmh,
+                'wind_dir': wind_dir,
+                'wind_str': wind_str,
+            }
+        
+        return result
+    except Exception as e:
+        print(f'Error fetching HKO forecast: {e}')
+        return {}
 
 def get_weather(location="Hong+Kong"):
     """Fetch weather data from wttr.in in JSON format."""
